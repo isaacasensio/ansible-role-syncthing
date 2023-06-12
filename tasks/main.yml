@@ -28,6 +28,8 @@
   loop:
     - "{{ syncthing_host_config_path }}"
     - "{{ syncthing_host_data_path }}"
+    - "{{ syncthing_host_data_path }}/data1"
+    - "{{ syncthing_host_data_path }}/data2"
 
 - name: Copy syncthing docker-compose template.
   ansible.builtin.template:
