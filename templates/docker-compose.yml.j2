@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+---
+version: "2.1"
+services:
+  syncthing:
+    image: {{ syncthing_image }}
+    container_name: syncthing
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{syncthing_timezone}}
+    volumes:
+      - {{ syncthing_host_config_path }}/config:/config
+      - {{ syncthing_host_data_path }}/data1:/data1
+      - {{ syncthing_host_data_path }}/data2:/data2
+    ports:
+      - {{ syncthing_host_port }}:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    restart: unless-stopped

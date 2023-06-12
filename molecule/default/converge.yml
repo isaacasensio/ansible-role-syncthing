@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    rclone_container_user: root
+    rclone_host_backup_path: /tmp/backup
+
+  roles:
+    - role: iasensio.syncthing

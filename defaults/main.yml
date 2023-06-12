@@ -1,0 +1,7 @@
+---
+syncthing_image: "lscr.io/linuxserver/syncthing:latest"
+syncthing_timezone: "Europe/Madrid"
+syncthing_host_config_path: /etc/syncthing
+syncthing_host_data_path: /var/lib/syncthing
+syncthing_container_user: syncthing
+syncthing_host_port: 8384

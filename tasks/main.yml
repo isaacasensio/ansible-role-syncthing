@@ -1,0 +1,69 @@
+---
+- name: Create syncthing user
+  ansible.builtin.user:
+    name: "{{ syncthing_container_user }}"
+    shell: /sbin/nologin
+    create_home: true
+    state: present
+  become: true
+
+- name: Get created user metadata
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ syncthing_container_user }}"
+
+- name: Setting user id and group id facts
+  ansible.builtin.set_fact:
+    created_uid: "{{ ansible_facts.getent_passwd[syncthing_container_user].1 }}"
+    created_gid: "{{ ansible_facts.getent_passwd[syncthing_container_user].2 }}"
+
+- name: Ensure syncthing folders exists
+  become: true
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    owner: "{{ syncthing_container_user }}"
+    group: "{{ syncthing_container_user }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "{{ syncthing_host_config_path }}"
+    - "{{ syncthing_host_data_path }}"
+
+- name: Copy syncthing docker-compose template.
+  ansible.builtin.template:
+    src: templates/docker-compose.yml.j2
+    dest: "{{ syncthing_host_config_path }}/docker-compose.yml"
+    owner: "{{ syncthing_container_user }}"
+    group: "{{ syncthing_container_user }}"
+    mode: 0644
+  become: true
+
+- name: Create systemd syncthing service.
+  ansible.builtin.template:
+    src: templates/syncthing.service.j2
+    dest: "/etc/systemd/system/syncthing.service"
+    mode: 0644
+  become: true
+
+- name: Ensure syncthing.service is started
+  ansible.builtin.systemd:
+    state: started
+    enabled: true
+    name: syncthing
+  become: true
+
+- name: Check syncthing container
+  ansible.builtin.uri:
+    url: "http://localhost:{{ syncthing_host_port }}"
+  register: result
+  until: result.status == 200
+  retries: 5
+  delay: 30
+
+- name: Remove old image versions
+  become: true
+  community.docker.docker_prune:
+    images: true
+    images_filters:
+      dangling: false
+  notify: Restart Docker service
