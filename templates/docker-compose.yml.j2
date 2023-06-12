@@ -11,8 +11,8 @@ services:
       - TZ={{syncthing_timezone}}
     volumes:
       - {{ syncthing_host_config_path }}/config:/config
-      - {{ syncthing_host_data_path }}/data1:/data1
-      - {{ syncthing_host_data_path }}/data2:/data2
+      - {{ syncthing_host_data_path }}/data1:/data1:rw
+      - {{ syncthing_host_data_path }}/data2:/data2:rw
     ports:
       - {{ syncthing_host_port }}:8384
       - 22000:22000/tcp
